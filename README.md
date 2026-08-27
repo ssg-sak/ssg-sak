@@ -1,52 +1,60 @@
 <div align="center">
 
-# 안녕하세요, 이현석입니다
+![슥삭슥삭 — SSG-SAK](./assets/ssg-sak-banner.svg)
 
-**데이터 분석 · 공공데이터 · GIS**
+# 슥삭슥삭 ⚡
 
-데이터를 정리하고, 분석 기준을 세우고, 결과를 설명하는 일을 합니다.
+**복잡한 데이터도, 슥삭슥삭.**
 
-[대구 골든타임](https://ssg-sak.github.io/golden-project/) · [EV SafeCharge](https://github.com/ssg-sak/git-elctronic) · [Golden Data Lab](https://github.com/ssg-sak/golden-data-lab)
+수집하고 · 정리하고 · 분석하고 · 확인합니다.
+
+[![대구 골든타임](https://img.shields.io/badge/GOLDEN%20TIME-F0B44D?style=for-the-badge)](https://ssg-sak.github.io/golden-project/)
+[![EV SafeCharge](https://img.shields.io/badge/EV%20SAFECHARGE-63D9CA?style=for-the-badge)](https://github.com/ssg-sak/git-elctronic)
+[![Golden Data Lab](https://img.shields.io/badge/GOLDEN%20DATA%20LAB-B69AF7?style=for-the-badge)](https://github.com/ssg-sak/golden-data-lab)
 
 </div>
 
 ---
 
-## About
+## ⚡ About SSG-SAK
 
-행정학을 전공하고 데이터 분석가를 준비하고 있습니다. 지역별 의료 접근성처럼 공공데이터로 살펴볼 수 있는 문제에서 출발해, 충전소 상태 데이터와 고객·매출 데이터로 분석 경험을 넓히고 있습니다.
+공공데이터·공간분석 프로젝트를 만들며 데이터 분석가를 준비하고 있습니다. 지역별 의료 접근성처럼 공공데이터로 살펴볼 수 있는 문제에서 출발해, 충전소 상태 데이터와 고객·매출 데이터로 분석 경험을 넓히고 있습니다.
 
 결과를 보기 전에 **무엇을 한 건으로 세는지, 빠진 데이터는 무엇인지, 어느 시점까지의 정보인지**부터 확인합니다. 분석에 쓴 기준과 한계를 기록하고, 다른 사람도 같은 결과를 확인할 수 있도록 코드와 문서를 함께 정리합니다.
 
 관심 있는 일은 **데이터 분석, 데이터 품질·운영, 지표 관리와 리포팅, 공공·행정 데이터 분석**입니다.
 
-## Tech Stack
+## 🧰 Tech Stack
 
 프로젝트에서 사용한 기술을 분야별로 정리했습니다. 학습 중인 도구는 별도로 표시했습니다.
 
-**데이터 분석·공간분석**
+### Data & Analytics
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![SQL](https://img.shields.io/badge/SQL-336791?style=flat-square) ![pandas](https://img.shields.io/badge/pandas-150458?style=flat-square&logo=pandas&logoColor=white) ![NumPy](https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white) ![GeoPandas](https://img.shields.io/badge/GeoPandas-139C5A?style=flat-square&logo=geopandas&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![SQL](https://img.shields.io/badge/SQL-336791?style=for-the-badge) ![pandas](https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white) ![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white) ![GeoPandas](https://img.shields.io/badge/GeoPandas-139C5A?style=for-the-badge&logo=geopandas&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white) ![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white) ![matplotlib](https://img.shields.io/badge/matplotlib-11557C?style=for-the-badge) ![seaborn](https://img.shields.io/badge/seaborn-4C72B0?style=for-the-badge)
 
-**데이터베이스·시각화**
+### Database
 
-![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white) ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=flat-square&logo=sqlalchemy&logoColor=white) ![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat-square&logo=jupyter&logoColor=white) ![matplotlib](https://img.shields.io/badge/matplotlib-11557C?style=flat-square) ![seaborn](https://img.shields.io/badge/seaborn-4C72B0?style=flat-square)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
-**웹서비스 구현 경험**
+### Frontend
 
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 
-**검증·협업·배포**
+### Backend
 
-![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white) ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat-square) ![Git](https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white) ![Render](https://img.shields.io/badge/Render-000000?style=flat-square&logo=render&logoColor=white) ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-222222?style=flat-square&logo=githubpages&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white) ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
 
-**현재 학습·보강 중**
+### Testing & DevOps
 
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=flat-square)
+![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white) ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge) ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white) ![Render](https://img.shields.io/badge/Render-000000?style=for-the-badge&logo=render&logoColor=white) ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-222222?style=for-the-badge&logo=githubpages&logoColor=white)
+
+### Currently Learning
+
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=for-the-badge)
 
 SQL 분석 실습과 통계 해석을 계속 보강하고 있습니다. SQL 작업에는 DBeaver를 사용합니다.
 
-## Projects
+## 🚀 Projects
 
 ### 01. 대구 골든타임 · 골든 거버넌스
 
@@ -92,7 +100,7 @@ SQL 분석 실습과 통계 해석을 계속 보강하고 있습니다. SQL 작�
 
 [저장소·진행 상황](https://github.com/ssg-sak/golden-data-lab)
 
-## How I Work
+## 🧭 How I Work
 
 - **집계 기준부터 정합니다.** 기간, 단위, 분모, 제외 조건이 달라지면 같은 데이터에서도 다른 결과가 나옵니다.
 - **확인한 사실과 추정을 구분합니다.** 관측되지 않은 값, 분석의 가정, 해석의 한계를 결과와 함께 남깁니다.
@@ -100,4 +108,10 @@ SQL 분석 실습과 통계 해석을 계속 보강하고 있습니다. SQL 작�
 
 ---
 
+<div align="center">
+
+**슥삭슥삭 / SSG-SAK**
+
 <sub>프로젝트의 상세 방법, 데이터 출처, 검증 기록과 진행 상황은 각 저장소에서 확인할 수 있습니다.</sub>
+
+</div>
