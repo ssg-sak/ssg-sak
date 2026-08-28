@@ -1,7 +1,8 @@
 """Build small, self-contained SVG assets for the GitHub profile.
 
-Usage: python scripts/build_profile.py
-Requires fontTools. PROFILE_FONT_DIR may point to a DejaVu Sans font folder.
+Usage: python scripts/build_profile.py [--gif]
+Requires fontTools; --gif also requires Pillow and Inkscape.
+PROFILE_FONT_DIR may point to a DejaVu Sans font folder.
 No remote images, scripts, tracking pixels or generated contribution statistics.
 """
 from pathlib import Path
@@ -54,161 +55,134 @@ def svg(name,w,h,title,desc,body):
 </svg>'''
     (OUT/name).write_text(result,encoding='utf-8')
 
-def banner():
-    b='''<style>
-.orbit { transform-origin:925px 191px; animation:orbit 28s linear infinite; }
-.twinkle { animation:twinkle 4s ease-in-out infinite; }
-.glint { animation:glint 9s linear infinite; }
-@keyframes orbit { to { transform:rotate(360deg); } }
-@keyframes twinkle { 0%,100% { opacity:.3; } 50% { opacity:1; } }
-@keyframes glint { 0% { transform:translateX(0); } 65%,100% { transform:translateX(1520px); } }
-@media (prefers-reduced-motion:reduce) { .orbit,.twinkle,.glint { animation:none; } .glint { display:none; } }
-</style><defs>
-<linearGradient id="paper" x2="1" y2="1"><stop stop-color="#FFFFFF"/><stop offset=".6" stop-color="#FFF9F1"/><stop offset="1" stop-color="#FFE5C7"/></linearGradient>
-<linearGradient id="orange" x2="1" y2="1"><stop stop-color="#F88732"/><stop offset="1" stop-color="#E75118"/></linearGradient>
-<linearGradient id="ball" x2="1" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#FFF1DF"/></linearGradient>
-<linearGradient id="glint"><stop stop-color="#FFFFFF" stop-opacity="0"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity=".9"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
-<pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#DCA97C" opacity=".24"/></pattern>
-<clipPath id="clip"><rect x="1" y="1" width="1118" height="398" rx="26"/></clipPath>
-</defs>
-<g clip-path="url(#clip)">
-<rect width="1120" height="400" fill="url(#paper)"/>
-<rect x="610" width="510" height="400" fill="url(#dots)"/>
-<path d="M694 -30L508 430H574L760 -30Z" fill="#FFFFFF" opacity=".5"/>
-<circle cx="935" cy="207" r="188" fill="none" stroke="#F5D8BA"/>
-<circle cx="935" cy="207" r="157" fill="none" stroke="#F4C69E" stroke-dasharray="3 10"/>
-<path d="M770 283Q865 376 1045 286" fill="none" stroke="#F8B878" stroke-width="2"/>
-</g>'''
-    b+=rect(1,1,1118,398,'none','#F0DCC7',26)
-    b+=pill('DATA ANALYTICS  /  BUILDER',44,34,300)
-    b+=text('SSG-SAK',40,173,92,INK,True,spacing=-4)
-    b+=text('DATA. SYSTEMS.',44,231,37,ORANGE,True,-.7)
-    b+=text('DECISIONS.',44,278,37,ORANGE,True,-.7)
-    b+=text('From a clear question to a working product.',46,318,19,MUTED)
-    b+='<path d="M46 350H588" stroke="#EEDAC5"/><path d="M46 350H169" stroke="#F27629" stroke-width="3"/>'
-    b+=text('PYTHON  /  SQL  /  DATA QUALITY  /  WEB',46,378,14,MUTED,True,1)
-    # Baseball identity from the original profile, redrawn on warm white.
-    b+='<g transform="translate(925 191) rotate(-18)">'
-    b+='<ellipse cy="116" rx="96" ry="13" fill="#DEB995" opacity=".2"/>'
-    b+='<circle r="112" fill="url(#ball)" stroke="#F1CBA9" stroke-width="2"/>'
-    b+='<circle cx="-22" cy="-26" r="77" fill="#FFFFFF" opacity=".5"/>'
-    for sign in [-1,1]:
-        x=sign*61
-        b+=f'<path d="M{x} -88Q{sign*4} 0 {x} 88" fill="none" stroke="#EA6A2B" stroke-width="3"/>'
-        for j in range(-4,5):
-            yy=j*18
-            xx=sign*(32.5+28.5*(yy/88)**2)
-            b+=f'<path d="M{xx-7} {yy-4}l14 8" stroke="#ED7131" stroke-width="3" stroke-linecap="round"/>'
-    b+='</g>'
-    b+=rect(735,52,126,46,'#FFFFFF','#F1D8BF',12)+text('SQL',769,82,22,INK,True)
-    b+=rect(969,275,116,46,'#FFFFFF','#F1D8BF',12)+text('API',1000,305,22,INK,True)
-    b+=pill('SF GIANTS + HANWHA EAGLES',760,347,310,'#FFFFFF',MUTED,13)
-    b+=sparkle(735,213,14)+sparkle(1054,66,12)+sparkle(1080,228,7,'#F4AC50')
-    b+='<g class="orbit"><circle cx="806" cy="91" r="4" fill="#F47A2D"/></g>'
-    b+='<g class="twinkle" opacity=".7">'+sparkle(1064,137,7)+'</g>'
-    b+='<g clip-path="url(#clip)"><rect class="glint" x="-220" y="0" width="150" height="400" fill="url(#glint)" opacity=".26"/></g>'
-    svg('ssg-sak-banner.svg',1120,400,'SSG-SAK — Data, Systems, Decisions','Bright ivory and orange profile banner. Data analytics, data quality and full-stack projects. San Francisco Giants and Hanwha Eagles fan.',b)
+import json
+import re
+import subprocess
+import tempfile
+from xml.etree import ElementTree as ET
 
-def card(name,num,title,kind,lines,highlight,stack,accent,light,icon):
-    b=rect(1,1,538,274,'#FFFFFF','#E5E8EB',22)
-    b+=rect(1,1,538,66,light,rx=22)+rect(1,40,538,27,light,rx=0)
-    b+=text(num,23,42,19,accent,True)+text(kind,66,41,14,accent,True,1)
-    b+=text(title,24,108,29,INK,True,-.7)
-    for i,line in enumerate(lines): b+=text(line,25,148+i*28,19,MUTED)
-    b+=pill(highlight,24,195,460,light,accent,14)
-    b+=text(stack,25,253,14,MUTED)
-    b+=f'<g transform="translate(480 20)" fill="none" stroke="{accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{icon}</g>'
-    svg(name,540,276,title,kind+'. '+' '.join(lines)+'. '+highlight+'. '+stack,b)
+LOGOS=json.loads((ROOT/'scripts/logo_sources.json').read_text())
+ET.register_namespace('', 'http://www.w3.org/2000/svg')
+
+def centered(s,x,y,size=16,color=INK,bold=True):
+    font=FONTS[bold]
+    glyphs=font.getGlyphSet()
+    cmap=font.getBestCmap()
+    width=sum(glyphs[cmap.get(ord(c),'.notdef')].width for c in s)*size/font['head'].unitsPerEm
+    return text(s,round(x-width/2,2),y,size,color,bold)
+
+def icon(name,x,y,color):
+    if name in LOGOS:
+        raw=LOGOS[name]
+        for ident in re.findall(r'id="([^"]+)"',raw):
+            raw=raw.replace('id="'+ident+'"','id="'+name+'-'+ident+'"').replace('#'+ident, '#'+name+'-'+ident)
+        root=ET.fromstring(raw)
+        root.set('x',str(x-25));root.set('y',str(y-25))
+        root.set('width','50');root.set('height','50')
+        if 'viewBox' not in root.attrib:root.set('viewBox','0 0 128 128')
+        root.set('fill',color)
+        return ET.tostring(root,encoding='unicode')
+    shapes={
+        'sql':'<ellipse cx="24" cy="10" rx="18" ry="7"/><path d="M6 10v28c0 10 36 10 36 0V10M6 23c0 10 36 10 36 0"/>',
+        'recharts':'<path d="M5 5v37h40M12 34l10-13 10 4 10-16"/><circle cx="22" cy="21" r="3"/><circle cx="32" cy="25" r="3"/>',
+        'alembic':'<path d="M17 3h14M20 3v16L7 41q-2 5 4 5h26q6 0 4-5L28 19V3M14 33h20"/>',
+        'reportlab':'<path d="M10 2h21l9 9v34H10ZM30 2v12h10M17 22h16M17 29h16M17 36h10"/>',
+        'githubpages':'<rect x="3" y="6" width="42" height="36" rx="4"/><path d="M3 16h42M20 23l-7 6 7 6m8-12 7 6-7 6"/>'}
+    return f'<g transform="translate({x-24} {y-24})" fill="none" stroke="{color}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">{shapes[name]}</g>'
+
+def banner():
+    b='''<defs>
+<linearGradient id="paper" x2="1" y2="1"><stop stop-color="#FFFDF9"/><stop offset=".6" stop-color="#FFF5E6"/><stop offset="1" stop-color="#FFE1BC"/></linearGradient>
+<linearGradient id="type" x2="1" y2=".4"><stop stop-color="#F68B36"/><stop offset="1" stop-color="#E6531B"/></linearGradient>
+<linearGradient id="ball" x2=".8" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#FFF2DF"/></linearGradient>
+<clipPath id="outer"><rect width="1120" height="240" rx="28"/></clipPath>
+</defs>
+<g clip-path="url(#outer)"><rect width="1120" height="240" fill="url(#paper)"/>
+<path d="M720-40L515 290M780-40L575 290" stroke="#FFF" stroke-width="24" opacity=".6"/>
+<circle cx="944" cy="121" r="164" fill="none" stroke="#F5C897"/>
+<circle cx="944" cy="121" r="132" fill="none" stroke="#EEB782" stroke-dasharray="2 10"/>
+<path d="M54 194H510" stroke="#EDCBA7"/><path d="M54 194H170" stroke="#EE7625" stroke-width="3"/>
+</g>'''
+    b+=text('SSG-SAK',48,159,108,'url(#type)',True,-5)
+    b+='<g transform="translate(939 120) rotate(-20)"><circle cy="7" r="90" fill="#EDC69F" opacity=".25"/><circle r="89" fill="url(#ball)" stroke="#EFCCA7" stroke-width="2"/>'
+    for side in [-1,1]:
+        b+=f'<path d="M{side*48} -72Q{side*2} 0 {side*48} 72" fill="none" stroke="#ED762F" stroke-width="2.5"/>'
+        for j in range(-4,5):
+            yy=j*14;xx=side*(24+24*(yy/72)**2)
+            b+=f'<path d="M{xx-6} {yy-3}l12 6" stroke="#ED762F" stroke-width="2.5" stroke-linecap="round"/>'
+    b+='</g>'+sparkle(788,123,17)+sparkle(1066,56,11)+sparkle(1079,187,8)
+    b+=rect(1,1,1118,238,'none','#F2DAC0',28)
+    svg('ssg-sak-banner.svg',1120,240,'SSG-SAK','SSG-SAK, orange wordmark and baseball on an ivory background.',b)
+
+ROWS=[
+ ('DATA & ANALYTICS','#D97427',[
+ ('python','Python','#3776AB'),('sql','SQL','#5180C0'),('pandas','pandas','#150458'),('numpy','NumPy','#4DABCF'),
+ ('geopandas','GeoPandas','#139B63'),('scikitlearn','scikit-learn','#F89939'),('jupyter','Jupyter','#F37726'),('matplotlib','Matplotlib','#297FC7')]),
+ ('FRONTEND','#4488C2',[
+ ('nextjs','Next.js','#222222'),('react','React','#49ADCC'),('typescript','TypeScript','#3178C6'),('tailwindcss','Tailwind CSS','#38BDF8'),
+ ('tanstack','TanStack|Query','#E77833'),('reacthookform','React Hook|Form','#EC5990'),('zod','Zod','#3E67B1'),('recharts','Recharts','#25A6A0')]),
+ ('BACKEND & REPORTS','#399A7F',[
+ ('fastapi','FastAPI','#009688'),('pydantic','Pydantic','#E92063'),('sqlalchemy','SQLAlchemy','#D32F2F'),('postgresql','PostgreSQL','#336791'),
+ ('sqlite','SQLite','#2683BE'),('alembic','Alembic','#AA693E'),('reportlab','ReportLab','#3E70B6'),('googlegemini','Gemini','#7662DE')]),
+ ('TEST & DELIVERY','#9273BB',[
+ ('docker','Docker|Compose','#2496ED'),('git','Git','#F05032'),('githubactions','GitHub|Actions','#2088FF'),('pytest','Pytest','#2D93A3'),
+ ('vitest','Vitest','#7CB420'),('playwright','Playwright','#2EAD33'),('render','Render','#242D35'),('githubpages','GitHub|Pages','#68788C')])
+]
 
 def stack():
-    b=rect(1,1,1118,688,'#FFFCF8','#F0DDC9',24)
-    b+=text('THE TOOLKIT',30,55,30,INK,True,-.6)+text('Used in projects. Organized by purpose.',32,84,17,MUTED)
-    b+=pill('2026.08',955,29,126,'#FFF0E2',ORANGE,16)
-    panels=[
-        (26,111,'01','DATA & ANALYTICS','#EA6A25','#FFF0E3',
-         [('Python','SQL','pandas'),('NumPy','GeoPandas','scikit-learn'),('Jupyter','Matplotlib','seaborn')]),
-        (575,111,'02','FRONTEND','#3376BD','#ECF5FF',
-         [('Next.js','React','TypeScript'),('Tailwind','TanStack Query','Recharts'),('React Hook Form','Zod','Zustand')]),
-        (26,365,'03','BACKEND & DATABASE','#188573','#EBF8F4',
-         [('FastAPI','Pydantic','SQLAlchemy'),('PostgreSQL','SQLite','Alembic'),('ReportLab','Gemini API','httpx')]),
-        (575,365,'04','TEST & DELIVERY','#8A5BB1','#F5EFFB',
-         [('Pytest','Vitest','Playwright'),('Git','GitHub Actions','Docker Compose'),('Render','GitHub Pages','CI')])
-    ]
-    for x,y,num,label,color,light,rows in panels:
-        b+=rect(x,y,519,232,'#FFFFFF','#E8E4DE',18)
-        b+=rect(x+1,y+1,517,52,light,rx=17)+rect(x+1,y+35,517,19,light,rx=0)
-        b+=text(num,x+18,y+34,17,color,True)+text(label,x+58,y+34,18,color,True)
-        b+=f'<circle cx="{x+491}" cy="{y+27}" r="4" fill="{color}"/>'
-        for ri,row in enumerate(rows):
-            for ci,label in enumerate(row):
-                xx=x+17+ci*165; yy=y+71+ri*48
-                b+=rect(xx,yy,155,37,'#FBFCFD','#E9ECF0',9)
-                size=14 if len(label)>12 else 16
-                b+=text(label,xx+10,yy+25,size,INK,True)
-    b+=text('DEEPENING NEXT',33,646,15,ORANGE,True,1)
-    b+=text('Advanced SQL  /  Power BI  /  Statistical analysis',225,646,18,MUTED)
-    b+=text('Technology names indicate project use, not equal proficiency in every tool.',33,675,14,MUTED)
-    svg('tech-stack.svg',1120,690,'SSG-SAK — Project Toolkit','Project-used technologies across data analytics, frontend, backend and databases, testing and delivery. Learning focus: advanced SQL, Power BI and statistical analysis. Tool use does not imply equal proficiency.',b)
+    b='''<defs>
+<linearGradient id="paper" x2="1" y2="1"><stop stop-color="#FFFFFF"/><stop offset=".6" stop-color="#FFFDF8"/><stop offset="1" stop-color="#FFF1E0"/></linearGradient>
+<linearGradient id="coin" x2=".2" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFBFD"/></linearGradient>
+<radialGradient id="halo"><stop stop-color="#F7B977" stop-opacity=".23"/><stop offset="1" stop-color="#F7B977" stop-opacity="0"/></radialGradient>
+</defs>'''
+    b+=rect(1,1,1118,818,'url(#paper)','#F0E3D4',28)
+    b+='<ellipse cx="1060" cy="70" rx="230" ry="100" fill="url(#halo)"/>'
+    b+=text('TECH',38,64,38,INK,True,-1)+text('STACK',164,64,38,ORANGE,True,-1)
+    b+=sparkle(1065,48,13)+sparkle(1037,66,6,'#EFAB4E')
+    for ri,(label,accent,items) in enumerate(ROWS):
+        top=110+ri*174
+        b+=text(label,39,top+10,16,accent,True,1.2)
+        b+=f'<path d="M340 {top+5}H1080" stroke="#EDE8E0"/><circle cx="1080" cy="{top+5}" r="3" fill="{accent}" opacity=".6"/>'
+        for ci,(name,label,color) in enumerate(items):
+            x=84+ci*136;y=top+74
+            b+=f'<ellipse cx="{x}" cy="{y+42}" rx="37" ry="8" fill="#D9C9BA" opacity=".15"/>'
+            b+=f'<circle cx="{x}" cy="{y}" r="45" fill="none" stroke="{accent}" opacity=".12"/><circle cx="{x}" cy="{y}" r="41" fill="url(#coin)" stroke="#E9E7E2"/>'
+            b+=f'<path d="M{x-25} {y-32}Q{x} {y-45} {x+25} {y-32}" stroke="#FFFFFF" stroke-width="3" fill="none"/>'
+            b+=icon(name,x,y,color)
+            labels=label.split('|')
+            for li,line in enumerate(labels):
+                b+=centered(line,x,y+68+li*19,15 if len(line)>11 else 16,INK,True)
+    b+=f'<path d="M38 799H1082" stroke="#F0E5D8"/>'
+    svg('tech-stack.svg',1120,820,'SSG-SAK Tech Stack','; '.join(name.replace('|',' ') for _,_,items in ROWS for _,name,_ in items),b)
 
-def footer():
-    b=rect(1,1,1118,100,'#FFF7EC','#F1DFC9',20)
-    b+=text('DEFINE IT. CHECK IT. SHIP IT.',28,47,25,INK,True)
-    b+=text('Clear metrics. Traceable data. Working products.',29,77,17,MUTED)
-    b+=sparkle(1060,48,16)+sparkle(1025,69,7,'#EFAB4E')
-    svg('profile-footer.svg',1120,102,'Define it. Check it. Ship it.','Clear metrics. Traceable data. Working products.',b)
-
-banner()
-card('project-factoryhr.svg','01','FactoryHR Lite','NEW / FULL-STACK',
-     ['HR operations, data validation,','KPI dashboards and PDF / CSV reports.'],
-     'PERSONAL PROJECT  /  SYNTHETIC DEMO DATA',
-     'Next.js  /  FastAPI  /  PostgreSQL','#C85219','#FFF0E3',
-     '<rect width="29" height="28" rx="4"/><path d="M7 20V14m7 6V8m7 12V11"/>')
-card('project-golden.svg','02','Daegu Golden Time','PUBLIC DATA / GIS',
-     ['Emergency-care access and','policy scenario analysis in Daegu.'],
-     '150 DISTRICTS  /  POLICY SIMULATION',
-     'Python  /  GeoPandas  /  React','#AA711B','#FFF6DE',
-     '<path d="M14 29S3 18 3 10a11 11 0 0 1 22 0c0 8-11 19-11 19Z"/><circle cx="14" cy="10" r="4"/>')
-card('project-ev.svg','03','EV SafeCharge','TEAM / DATA ROLE 01',
-     ['Data quality, time-aware processing,','features and model-ready datasets.'],
-     'MY ROLE: DATA  /  SCORING & UI: TEAM',
-     'Python  /  pandas  /  Parquet  /  Pytest','#197C70','#EAF8F3',
-     '<path d="M17 0L3 17h10l-2 13 17-19H17Z"/>')
-card('project-lab.svg','04','Golden Data Lab','IN PROGRESS / ANALYTICS',
-     ['Retail customer and revenue analysis.','From SQL extraction to reproducibility.'],
-     'CASE 01 IN PROGRESS  /  CASE 02 PLANNED',
-     'PostgreSQL  /  Python  /  Jupyter','#496BBC','#EEF3FF',
-     '<path d="M9 0h12m-9 0v10L2 27q-1 3 3 3h22q4 0 2-3L18 10V0M8 20h16"/>')
-stack()
-footer()
-if '--gif' in sys.argv:
-    import subprocess
-    import tempfile
-    from PIL import Image, ImageDraw, ImageFilter
+def gif():
+    from PIL import Image,ImageDraw,ImageFilter
     with tempfile.TemporaryDirectory() as td:
         png=Path(td)/'stack.png'
         subprocess.run(['inkscape',str(OUT/'tech-stack.svg'),'--export-type=png',f'--export-filename={png}'],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         base=Image.open(png).convert('RGBA')
+        palette=base.convert('RGB').quantize(colors=128)
         frames=[]
-        anchors=[(26,111),(575,111),(26,365),(575,365)]
-        palette=base.convert('RGB').quantize(colors=96)
-        for frame in range(60):
-            overlay=Image.new('RGBA',base.size,(0,0,0,0))
-            draw=ImageDraw.Draw(overlay)
-            for j,(x,y) in enumerate(anchors):
-                phase=(frame/60-j/4)%1
-                if phase<.62:
-                    head=x+22+int(phase/.62*473)
-                    for tail in range(65):
-                        xx=head-tail
-                        if xx<x+20: continue
-                        alpha=int((1-tail/65)*200)
-                        draw.line((xx,y+2,xx,y+2),fill=(255,143,48,alpha),width=3)
-                    draw.ellipse((head-2,y,head+2,y+4),fill=(255,210,141,230))
+        for frame in range(48):
+            overlay=Image.new('RGBA',base.size,(0,0,0,0));d=ImageDraw.Draw(overlay)
+            for row in range(4):
+                phase=(frame/48-row*.18)%1
+                head=350+int(phase*710);y=115+row*174
+                for tail in range(100):
+                    x=head-tail
+                    if x<342:continue
+                    d.line((x,y,x,y),fill=(245,156,63,int((1-tail/100)*200)),width=2)
+                d.ellipse((head-2,y-2,head+2,y+2),fill=(255,201,126,240))
             glow=overlay.filter(ImageFilter.GaussianBlur(4))
-            rgb=Image.alpha_composite(Image.alpha_composite(base,glow),overlay).convert('RGB')
-            frames.append(rgb.quantize(palette=palette,dither=Image.Dither.NONE))
-        frames[0].save(OUT/'tech-stack.gif',save_all=True,append_images=frames[1:],duration=90,loop=0,optimize=True,disposal=1)
+            out=Image.alpha_composite(Image.alpha_composite(base,glow),overlay).convert('RGB')
+            frames.append(out.quantize(palette=palette,dither=Image.Dither.NONE))
+        frames[0].save(OUT/'tech-stack.gif',save_all=True,append_images=frames[1:],duration=110,loop=0,disposal=1,optimize=True)
         assert (OUT/'tech-stack.gif').stat().st_size<1_000_000
-        print(f'tech-stack.gif: {(OUT/"tech-stack.gif").stat().st_size:,} bytes; 60 frames')
-for p in sorted(OUT.glob('*.svg')):
-    print(f'{p.name}: {p.stat().st_size:,} bytes')
+        print('GIF:',(OUT/'tech-stack.gif').stat().st_size,'bytes /',len(frames),'frames')
+
+banner()
+stack()
+if '--gif' in sys.argv:gif()
+for name in ['ssg-sak-banner.svg','tech-stack.svg']:
+    p=OUT/name
+    print(name,p.stat().st_size,'bytes')
