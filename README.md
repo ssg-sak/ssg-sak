@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/ssg-sak/golden-project"><img src="./assets/project-golden-time.svg" width="49%" alt="Golden Time"></a>
-  <a href="https://github.com/ssg-sak/git-elctronic"><img src="./assets/project-ev-safecharge.svg" width="49%" alt="EV SafeCharge"></a>
+  <a href="https://github.com/ssg-sak/git-electronic"><img src="./assets/project-ev-safecharge.svg" width="49%" alt="EV SafeCharge"></a>
 </p>
 <p align="center">
   <a href="https://github.com/ssg-sak/golden-data-lab"><img src="./assets/project-golden-data-lab.svg" width="49%" alt="Golden Data Lab"></a>
