@@ -1,7 +1,8 @@
 """Build small, self-contained SVG assets for the GitHub profile.
 
-Usage: python scripts/build_profile.py [--gif]
-Requires fontTools; --gif also requires Pillow and Inkscape.
+Usage: python scripts/build_profile.py
+Requires fontTools. The README uses static SVGs at every motion preference.
+The previous GIF remains an unused legacy asset.
 PROFILE_FONT_DIR may point to a DejaVu Sans font folder.
 No remote images, scripts, tracking pixels or generated contribution statistics.
 """
@@ -57,8 +58,6 @@ def svg(name,w,h,title,desc,body):
 
 import json
 import re
-import subprocess
-import tempfile
 from xml.etree import ElementTree as ET
 
 LOGOS=json.loads((ROOT/'scripts/logo_sources.json').read_text())
@@ -114,75 +113,118 @@ def banner():
     b+=rect(1,1,1118,238,'none','#F2DAC0',28)
     svg('ssg-sak-banner.svg',1120,240,'SSG-SAK','SSG-SAK, orange wordmark and baseball on an ivory background.',b)
 
-ROWS=[
- ('DATA & ANALYTICS','#D97427',[
- ('python','Python','#3776AB'),('sql','SQL','#5180C0'),('pandas','pandas','#150458'),('numpy','NumPy','#4DABCF'),
- ('geopandas','GeoPandas','#139B63'),('scikitlearn','scikit-learn','#F89939'),('jupyter','Jupyter','#F37726'),('matplotlib','Matplotlib','#297FC7')]),
- ('FRONTEND','#4488C2',[
- ('nextjs','Next.js','#222222'),('react','React','#49ADCC'),('typescript','TypeScript','#3178C6'),('tailwindcss','Tailwind CSS','#38BDF8'),
- ('tanstack','TanStack|Query','#E77833'),('reacthookform','React Hook|Form','#EC5990'),('zod','Zod','#3E67B1'),('recharts','Recharts','#25A6A0')]),
- ('BACKEND & REPORTS','#399A7F',[
- ('fastapi','FastAPI','#009688'),('pydantic','Pydantic','#E92063'),('sqlalchemy','SQLAlchemy','#D32F2F'),('postgresql','PostgreSQL','#336791'),
- ('sqlite','SQLite','#2683BE'),('alembic','Alembic','#AA693E'),('reportlab','ReportLab','#3E70B6'),('googlegemini','Gemini','#7662DE')]),
- ('TEST & DELIVERY','#9273BB',[
- ('docker','Docker|Compose','#2496ED'),('git','Git','#F05032'),('githubactions','GitHub|Actions','#2088FF'),('pytest','Pytest','#2D93A3'),
- ('vitest','Vitest','#7CB420'),('playwright','Playwright','#2EAD33'),('render','Render','#242D35'),('githubpages','GitHub|Pages','#68788C')])
+CORE = [
+    ('python', 'Python', '#3776AB'),
+    ('sql', 'SQL', '#5180C0'),
+    ('pandas', 'pandas', '#150458'),
+    ('postgresql', 'PostgreSQL', '#336791'),
+]
+SUPPORT = [
+    ('ANALYTICS', '#A94311', ['NumPy · GeoPandas', 'scikit-learn · Matplotlib']),
+    ('BACKEND / DB', '#28745F', ['FastAPI · SQLAlchemy', 'Pydantic · Alembic']),
+    ('WEB / DELIVERY', '#745A91', ['React · TypeScript', 'Docker · GitHub Actions']),
 ]
 
-def stack():
-    b='''<defs>
+
+def paper(width, height):
+    return '''<defs>
 <linearGradient id="paper" x2="1" y2="1"><stop stop-color="#FFFFFF"/><stop offset=".6" stop-color="#FFFDF8"/><stop offset="1" stop-color="#FFF1E0"/></linearGradient>
 <linearGradient id="coin" x2=".2" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#FAFBFD"/></linearGradient>
-<radialGradient id="halo"><stop stop-color="#F7B977" stop-opacity=".23"/><stop offset="1" stop-color="#F7B977" stop-opacity="0"/></radialGradient>
-</defs>'''
-    b+=rect(1,1,1118,818,'url(#paper)','#F0E3D4',28)
-    b+='<ellipse cx="1060" cy="70" rx="230" ry="100" fill="url(#halo)"/>'
-    b+=text('TECH',38,64,38,INK,True,-1)+text('STACK',164,64,38,ORANGE,True,-1)
-    b+=sparkle(1065,48,13)+sparkle(1037,66,6,'#EFAB4E')
-    for ri,(label,accent,items) in enumerate(ROWS):
-        top=110+ri*174
-        b+=text(label,39,top+10,16,accent,True,1.2)
-        b+=f'<path d="M340 {top+5}H1080" stroke="#EDE8E0"/><circle cx="1080" cy="{top+5}" r="3" fill="{accent}" opacity=".6"/>'
-        for ci,(name,label,color) in enumerate(items):
-            x=84+ci*136;y=top+74
-            b+=f'<ellipse cx="{x}" cy="{y+42}" rx="37" ry="8" fill="#D9C9BA" opacity=".15"/>'
-            b+=f'<circle cx="{x}" cy="{y}" r="45" fill="none" stroke="{accent}" opacity=".12"/><circle cx="{x}" cy="{y}" r="41" fill="url(#coin)" stroke="#E9E7E2"/>'
-            b+=f'<path d="M{x-25} {y-32}Q{x} {y-45} {x+25} {y-32}" stroke="#FFFFFF" stroke-width="3" fill="none"/>'
-            b+=icon(name,x,y,color)
-            labels=label.split('|')
-            for li,line in enumerate(labels):
-                b+=centered(line,x,y+68+li*19,15 if len(line)>11 else 16,INK,True)
-    b+=f'<path d="M38 799H1082" stroke="#F0E5D8"/>'
-    svg('tech-stack.svg',1120,820,'SSG-SAK Tech Stack','; '.join(name.replace('|',' ') for _,_,items in ROWS for _,name,_ in items),b)
+</defs>''' + rect(1, 1, width-2, height-2, 'url(#paper)', '#F0E3D4', 28)
 
-def gif():
-    from PIL import Image,ImageDraw,ImageFilter
-    with tempfile.TemporaryDirectory() as td:
-        png=Path(td)/'stack.png'
-        subprocess.run(['inkscape',str(OUT/'tech-stack.svg'),'--export-type=png',f'--export-filename={png}'],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-        base=Image.open(png).convert('RGBA')
-        palette=base.convert('RGB').quantize(colors=128)
-        frames=[]
-        for frame in range(48):
-            overlay=Image.new('RGBA',base.size,(0,0,0,0));d=ImageDraw.Draw(overlay)
-            for row in range(4):
-                phase=(frame/48-row*.18)%1
-                head=350+int(phase*710);y=115+row*174
-                for tail in range(100):
-                    x=head-tail
-                    if x<342:continue
-                    d.line((x,y,x,y),fill=(245,156,63,int((1-tail/100)*200)),width=2)
-                d.ellipse((head-2,y-2,head+2,y+2),fill=(255,201,126,240))
-            glow=overlay.filter(ImageFilter.GaussianBlur(4))
-            out=Image.alpha_composite(Image.alpha_composite(base,glow),overlay).convert('RGB')
-            frames.append(out.quantize(palette=palette,dither=Image.Dither.NONE))
-        frames[0].save(OUT/'tech-stack.gif',save_all=True,append_images=frames[1:],duration=110,loop=0,disposal=1,optimize=True)
-        assert (OUT/'tech-stack.gif').stat().st_size<1_000_000
-        print('GIF:',(OUT/'tech-stack.gif').stat().st_size,'bytes /',len(frames),'frames')
 
-banner()
-stack()
-if '--gif' in sys.argv:gif()
-for name in ['ssg-sak-banner.svg','tech-stack.svg']:
-    p=OUT/name
-    print(name,p.stat().st_size,'bytes')
+def core_tool(item, x, y, width):
+    name, label, color = item
+    b = rect(x, y, width, 78, '#FFF7EB', '#F2D8B9', 18)
+    b += f'<circle cx="{x+39}" cy="{y+39}" r="29" fill="url(#coin)" stroke="#EDDCC7"/>'
+    # Keep the original self-contained technology logos and coin motif.
+    b += f'<g transform="translate({x+39} {y+39}) scale(.74)">' + icon(name, 0, 0, color) + '</g>'
+    size = 25 if label != 'PostgreSQL' else (21 if width < 240 else 23)
+    b += text(label, x+79, y+48, size, INK, True)
+    return b
+
+
+def stack(mobile=False):
+    w, h = (520, 624) if mobile else (1120, 380)
+    b = paper(w, h)
+    b += text('TECH', 32, 49, 30, INK, True, -.6)
+    b += text('STACK', 132, 49, 30, ORANGE, True, -.6)
+    b += sparkle(w-42, 39, 10)
+    b += text('CORE', 34, 87, 17, '#A94311', True, 1)
+    for i, item in enumerate(CORE):
+        x = 28 + (i % 2)*238 if mobile else 32 + i*266
+        y = 104 + (i // 2)*91 if mobile else 108
+        b += core_tool(item, x, y, 226 if mobile else 250)
+    if mobile:
+        for i, (label, accent, lines) in enumerate(SUPPORT):
+            y = 310 + i*106
+            b += f'<path d="M32 {y-20}H488" stroke="#EEE2D4"/>'
+            b += text(label, 34, y+4, 17, accent, True, .5)
+            for j, line in enumerate(lines):
+                b += text(line, 34, y+35+j*29, 23, INK)
+    else:
+        for i, (label, accent, lines) in enumerate(SUPPORT):
+            y = 240 + i*53
+            b += f'<path d="M32 {y-28}H1088" stroke="#EEE2D4"/>'
+            b += text(label, 34, y, 17, accent, True, .6)
+            b += text(' · '.join(lines), 284, y, 23, INK)
+    description = 'Core: Python, SQL, pandas, PostgreSQL. ' + '; '.join(
+        label + ': ' + ' · '.join(lines) for label, _, lines in SUPPORT
+    ) + '. Static artwork; no animation.'
+    svg('tech-stack-mobile.svg' if mobile else 'tech-stack.svg', w, h,
+        'SSG-SAK — Core, Analytics, Backend and Delivery', description, b)
+
+
+def label_text(s, x, y, size, fill=INK, bold=False, spacing=0):
+    # Native text preserves Korean accessibility and uses the reader's CJK font.
+    family = "Arial, 'Noto Sans CJK KR', 'Noto Sans KR', 'Malgun Gothic', sans-serif"
+    weight = 700 if bold else 400
+    return (f'<text x="{x}" y="{y}" font-family="{family}" font-size="{size}" '
+            f'font-weight="{weight}" letter-spacing="{spacing}" fill="{fill}">'
+            f'{escape(s)}</text>')
+
+
+PROJECTS = [
+    ('golden-time', 'GOLDEN TIME', 'PERSONAL · GIS / WEB SERVICE',
+     ['대구 150개 행정동 의료 접근성 분석', 'GIS 정책 비교와 탐색 서비스 구현'],
+     'Python · GeoPandas · FastAPI',
+     '<path d="M56 38v36M38 56h36" stroke="#EE6B22" stroke-width="6" stroke-linecap="round"/>'),
+    ('ev-safecharge', 'EV SAFECHARGE', 'TEAM · MY ROLE: DATA / PIPELINE',
+     ['충전 데이터 정의·품질·전처리 담당', '가용률·피처·라벨 기준 설계'],
+     'Python · pandas · EDA',
+     '<path d="M60 34L44 59h14l-6 19 20-29H58z" fill="#EE6B22"/>'),
+    ('golden-data-lab', 'GOLDEN DATA LAB', 'PERSONAL · REPRODUCIBLE ANALYTICS',
+     ['소매 매출·청년 인구이동 분석 2건', 'SQL 추출부터 통계·KPI·대시보드까지'],
+     'SQL · PostgreSQL · Python',
+     '<path d="M39 70V54h8v16zm15 0V44h8v26zm15 0V35h8v35z" fill="#EE6B22"/>'),
+    ('factoryhr', 'FACTORYHR LITE', 'PERSONAL · FULL-STACK / HR',
+     ['직원·근태 관리 DB·API·화면 구현', 'DB 무결성 검증과 역할별 권한 분리'],
+     'PostgreSQL · FastAPI · Next.js',
+     '<path d="M38 72V49l12 7V45l12 7V38h13v34z" fill="none" stroke="#EE6B22" stroke-width="4" stroke-linejoin="round"/>'),
+]
+
+
+def project_cards():
+    for key, title, kind, lines, technologies, symbol in PROJECTS:
+        b = '''<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#FFFDF9"/><stop offset="1" stop-color="#FFF0DC"/></linearGradient></defs>'''
+        b += rect(1, 5, 538, 210, 'url(#bg)', '#F0D3B5', 22)
+        b += '<circle cx="56" cy="56" r="30" fill="#FFF7ED" stroke="#F5B77A"/>' + symbol
+        b += label_text(title, 103, 49, 26, '#C24915', True)
+        b += label_text(kind, 103, 76, 14.5, '#795E4B', True, .4)
+        b += '<path d="M489 48l10 8-10 8" fill="none" stroke="#D65C1D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
+        b += '<path d="M30 99H510" stroke="#EED8C1"/>'
+        for j, line in enumerate(lines):
+            b += label_text(line, 30, 133+j*30, 22)
+        b += label_text(technologies, 30, 194, 18, '#795E4B')
+        svg('project-'+key+'.svg', 540, 220, title,
+            kind + '. ' + '. '.join(lines) + '. ' + technologies, b)
+
+
+if __name__ == '__main__':
+    banner()
+    stack()
+    stack(mobile=True)
+    project_cards()
+    for name in ['ssg-sak-banner.svg', 'tech-stack.svg', 'tech-stack-mobile.svg']:
+        p = OUT/name
+        print(name, p.stat().st_size, 'bytes')
